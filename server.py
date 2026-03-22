@@ -31,6 +31,7 @@ def get_stdio_params() -> StdioServerParameters:
         command=parts[0],
         args=parts[1:] if len(parts) > 1 else [],
         cwd=STDIO_CWD,
+        env=os.environ.copy(),  # 親プロセスの環境変数をサブプロセスに明示的に継承
     )
 
 
