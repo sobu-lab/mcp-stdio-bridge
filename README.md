@@ -219,6 +219,18 @@ gcloud iam service-accounts add-iam-policy-binding \
   --project=<YOUR_PROJECT_ID>
 ```
 
+> **2つ目以降のリポジトリを追加する場合**、プール・プロバイダーの作成は不要です。バインディングの追加のみ行ってください：
+>
+> ```bash
+> PROJECT_NUMBER=$(gcloud projects describe <YOUR_PROJECT_ID> --format="value(projectNumber)")
+>
+> gcloud iam service-accounts add-iam-policy-binding \
+>   "github-actions-cloudrun@<YOUR_PROJECT_ID>.iam.gserviceaccount.com" \
+>   --role="roles/iam.workloadIdentityUser" \
+>   --member="principalSet://iam.googleapis.com/projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github-pool/attribute.repository/<GITHUB_ORG>/<NEW_REPO_NAME>" \
+>   --project=<YOUR_PROJECT_ID>
+> ```
+
 ### 5. GitHub Secrets の登録
 
 ```bash
