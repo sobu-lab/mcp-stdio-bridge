@@ -1,63 +1,63 @@
 # mcp-stdio-bridge
 
-A generic bridge that exposes any **stdio MCP server** as a **Streamable HTTP MCP server**.
+任意の **stdio MCP サーバー** を **Streamable HTTP MCP サーバー** として公開する汎用ブリッジです。
 
-No modifications to the original MCP server are required. Configure the stdio command via environment variables and deploy anywhere that accepts HTTP (e.g. Google Cloud Run).
+元の MCP サーバーのコードを一切変更せずに使えます。環境変数でコマンドを指定するだけで、Google Cloud Run など HTTP を受け付けるサービスにデプロイできます。
 
 ```
 Claude.ai / mcp-remote
        │  HTTP POST /mcp
        ▼
 ┌─────────────────────┐
-│   mcp-stdio-bridge  │  ← this repo (Python, uvicorn)
+│   mcp-stdio-bridge  │  ← このリポジトリ (Python / uvicorn)
 │   server.py         │
 └────────┬────────────┘
          │  stdin / stdout
          ▼
 ┌─────────────────────┐
-│  Any stdio MCP      │
-│  server             │
+│  任意の stdio MCP   │
+│  サーバー           │
 └─────────────────────┘
 ```
 
-## How it works
+## 仕組み
 
-- Uses the Python MCP SDK's `StreamableHTTPSessionManager` on the HTTP side
-- Spawns the stdio MCP server as a subprocess per request (stateless)
-- Bridges `list_tools` and `call_tool` calls transparently
-- Handles OAuth discovery endpoints automatically (no auth required)
+- Python MCP SDK の `StreamableHTTPSessionManager` で HTTP を処理
+- リクエストごとに stdio MCP サーバーをサブプロセスとして起動（ステートレス）
+- `list_tools` / `call_tool` を透過的にブリッジ
+- OAuth ディスカバリエンドポイントを自動処理（認証不要で返却）
 
-## Files
+## ファイル
 
-| File | Description |
+| ファイル | 説明 |
 |---|---|
-| `server.py` | The bridge (copy this into your project) |
-| `requirements.txt` | Bridge dependencies only |
+| `server.py` | ブリッジ本体（プロジェクトにコピーして使用） |
+| `requirements.txt` | ブリッジの依存パッケージのみ |
 
 ---
 
-## Usage
+## 使い方
 
-### 1. Copy `server.py` into your project
+### 1. `server.py` をプロジェクトにコピー
 
-Place `server.py` alongside your stdio MCP server, or in a parent directory.
+stdio MCP サーバーと同じディレクトリか、親ディレクトリに配置します。
 
-### 2. Install dependencies
+### 2. 依存パッケージをインストール
 
 ```bash
 pip install mcp uvicorn starlette
-# also install your stdio MCP server's dependencies
+# stdio MCP サーバーの依存パッケージも別途インストール
 ```
 
-### 3. Set environment variables
+### 3. 環境変数を設定
 
-| Variable | Description | Default |
+| 変数名 | 説明 | デフォルト |
 |---|---|---|
-| `STDIO_CMD` | Command to launch the stdio MCP server | `python mcp_server.py` |
-| `STDIO_CWD` | Working directory for the stdio server | (current dir) |
-| `PORT` | HTTP port to listen on | `8080` |
+| `STDIO_CMD` | stdio MCP サーバーの起動コマンド | `python mcp_server.py` |
+| `STDIO_CWD` | stdio サーバーの作業ディレクトリ | （カレントディレクトリ） |
+| `PORT` | HTTP リッスンポート | `8080` |
 
-### 4. Run
+### 4. 起動
 
 ```bash
 STDIO_CMD="python your_mcp_server.py" uvicorn server:app --host 0.0.0.0 --port 8080
@@ -65,17 +65,17 @@ STDIO_CMD="python your_mcp_server.py" uvicorn server:app --host 0.0.0.0 --port 8
 
 ---
 
-## Docker / Cloud Run example
+## Docker / Cloud Run での使用例
 
-### Project layout
+### ディレクトリ構成
 
 ```
 your-project/
-  server.py          ← copied from this repo
-  requirements.txt   ← merged bridge + server deps
+  server.py          ← このリポジトリからコピー
+  requirements.txt   ← ブリッジ + サーバーの依存をまとめたもの
   stdio/
-    your_server.py   ← original stdio MCP server
-    (other files...)
+    your_server.py   ← 元の stdio MCP サーバー
+    （その他のファイル）
 ```
 
 ### Dockerfile
@@ -85,7 +85,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Clone or copy your stdio MCP server
+# stdio MCP サーバーをクローン
 RUN apt-get update && apt-get install -y --no-install-recommends git && \
     git clone --depth=1 https://github.com/your-org/your-mcp-server.git /tmp/mcp && \
     cp -r /tmp/mcp/src/. ./stdio/ && \
@@ -102,13 +102,13 @@ EXPOSE 8080
 CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8080"]
 ```
 
-### requirements.txt (merged)
+### requirements.txt（まとめた例）
 
 ```
 mcp
 uvicorn
 starlette
-# add your stdio server's dependencies below
+# stdio サーバーの依存パッケージを以下に追加
 shapely
 pyproj
 requests
@@ -116,9 +116,9 @@ requests
 
 ---
 
-## Connect from Claude.ai
+## Claude.ai からの接続設定
 
-Add to your MCP client config (e.g. `claude_desktop_config.json`):
+MCP クライアントの設定ファイル（例: `claude_desktop_config.json`）に追記します：
 
 ```json
 {
@@ -136,12 +136,12 @@ Add to your MCP client config (e.g. `claude_desktop_config.json`):
 
 ---
 
-## Real-world example
+## 実際の使用例
 
-[mlit-geospatial-mcp-sgw](https://github.com/sobu-lab/mlit-geospatial-mcp-sgw) uses this bridge to expose the stdio-based [chirikuuka/mlit-geospatial-mcp](https://github.com/chirikuuka/mlit-geospatial-mcp) (Japan MLIT geospatial data API) over HTTP on Google Cloud Run.
+[mlit-geospatial-mcp-sgw](https://github.com/sobu-lab/mlit-geospatial-mcp-sgw) では、このブリッジを使って stdio ベースの [chirikuuka/mlit-geospatial-mcp](https://github.com/chirikuuka/mlit-geospatial-mcp)（国土交通省 不動産情報ライブラリ API）を Google Cloud Run 上で HTTP として公開しています。
 
 ---
 
-## License
+## ライセンス
 
 MIT
