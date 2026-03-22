@@ -38,18 +38,20 @@ Claude.ai / mcp-remote
 
 ## 使い方
 
-### 1. `server.py` をプロジェクトにコピー
+### A. ローカルで直接起動する場合
+
+#### 1. `server.py` をプロジェクトにコピー
 
 stdio MCP サーバーと同じディレクトリか、親ディレクトリに配置します。
 
-### 2. 依存パッケージをインストール
+#### 2. 依存パッケージをインストール
 
 ```bash
 pip install mcp uvicorn starlette
 # stdio MCP サーバーの依存パッケージも別途インストール
 ```
 
-### 3. 環境変数を設定
+#### 3. 環境変数を設定して起動
 
 | 変数名 | 説明 | デフォルト |
 |---|---|---|
@@ -57,25 +59,23 @@ pip install mcp uvicorn starlette
 | `STDIO_CWD` | stdio サーバーの作業ディレクトリ | （カレントディレクトリ） |
 | `PORT` | HTTP リッスンポート | `8080` |
 
-### 4. 起動
-
 ```bash
 STDIO_CMD="python your_mcp_server.py" uvicorn server:app --host 0.0.0.0 --port 8080
 ```
 
 ---
 
-## Docker / Cloud Run での使用例
+### B. Docker / Cloud Run で使う場合
 
-### ディレクトリ構成
+Dockerfile の中で stdio サーバーのクローン・`server.py` のコピー・依存パッケージのインストールをすべて行うため、**手順 A の 1・2 は不要**です。
+
+#### ディレクトリ構成
 
 ```
 your-project/
   server.py          ← このリポジトリからコピー
   requirements.txt   ← ブリッジ + サーバーの依存をまとめたもの
-  stdio/
-    your_server.py   ← 元の stdio MCP サーバー
-    （その他のファイル）
+  Dockerfile
 ```
 
 ### Dockerfile
