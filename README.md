@@ -303,7 +303,7 @@ git push origin main
 
 ### 8. 未認証アクセスの許可
 
-初回デプロイ後に実行します：
+初回デプロイ後に実行します。これを行わないと Claude.ai 等からのリクエストが 403 で拒否されます：
 
 ```bash
 gcloud run services add-iam-policy-binding <SERVICE_NAME> \
@@ -312,6 +312,8 @@ gcloud run services add-iam-policy-binding <SERVICE_NAME> \
   --role="roles/run.invoker" \
   --project=<YOUR_PROJECT_ID>
 ```
+
+> **注意:** `deploy.yml` に `--allow-unauthenticated` フラグを追加しても、組織ポリシーによって拒否される場合があります。その場合は上記コマンドを手動で実行してください。
 
 ### コスト管理（Cloud Run 無料枠）
 
