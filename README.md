@@ -87,12 +87,15 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# ↓【変更】stdio MCP サーバーのリポジトリURLを指定
-# src/ 以下にサーバーコードがある場合は /tmp/mcp/src/. のまま
-# src/ がなくルート直下にある場合は /tmp/mcp/. に変更
+# ↓【変更】stdio MCP サーバーのリポジトリURL
+ARG STDIO_REPO=https://github.com/your-org/your-mcp-server.git
+# ↓【変更】コードが src/ 以下にある場合は /tmp/mcp/src/. のまま
+#          src/ がなくルート直下にある場合は /tmp/mcp/. に変更
+ARG STDIO_SRC=/tmp/mcp/src/.
+
 RUN apt-get update && apt-get install -y --no-install-recommends git && \
-    git clone --depth=1 https://github.com/your-org/your-mcp-server.git /tmp/mcp && \
-    cp -r /tmp/mcp/src/. ./stdio/ && \
+    git clone --depth=1 $STDIO_REPO /tmp/mcp && \
+    cp -r $STDIO_SRC ./stdio/ && \
     rm -rf /tmp/mcp && \
     apt-get purge -y git && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
@@ -101,7 +104,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # ↓【変更】stdio サーバーの起動コマンド（server.py 以外の場合）
 ENV STDIO_CMD="python server.py"
-# ↓【変更不要】クローン先を変えた場合のみ修正
 ENV STDIO_CWD="/app/stdio"
 
 EXPOSE 8080
