@@ -308,9 +308,22 @@ jobs:
 
 ### 7. 初回デプロイ
 
+必要なファイルをコミットして push します。GitHub Actions が自動で起動し、ビルド・デプロイが実行されます。
+
 ```bash
-git push origin main
+git init
+git branch -m main
+git add Dockerfile server.py requirements.txt .github/workflows/deploy.yml
+git commit -m "Initial commit"
+git remote add origin https://github.com/<GITHUB_ORG>/<REPO_NAME>.git
+git push -u origin main
 ```
+
+> すでに GitHub 上でリポジトリを作成済みで、ローカルと紐付け済みの場合は以下のみ：
+>
+> ```bash
+> git push origin main
+> ```
 
 ### 8. 未認証アクセスの許可
 
