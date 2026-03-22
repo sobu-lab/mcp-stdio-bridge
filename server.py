@@ -1,11 +1,11 @@
 """
-Generic stdio-to-HTTP MCP bridge.
-Wraps any stdio MCP server as a Streamable HTTP server.
+汎用 stdio-to-HTTP MCP ブリッジ。
+任意の stdio MCP サーバーを Streamable HTTP サーバーとして公開する。
 
-Configuration via environment variables:
-  STDIO_CMD  - command to run the stdio MCP server (default: "python mcp_server.py")
-  STDIO_CWD  - working directory for the stdio server (optional)
-  PORT       - HTTP port to listen on (default: 8080)
+環境変数による設定:
+  STDIO_CMD  - stdio MCP サーバーの起動コマンド（デフォルト: "python mcp_server.py"）
+  STDIO_CWD  - stdio サーバーの作業ディレクトリ（省略可）
+  PORT       - HTTP リッスンポート（デフォルト: 8080）
 """
 import json
 import logging
@@ -86,7 +86,7 @@ async def app(scope, receive, send):
     path = scope.get("path", "")
 
     if path == "/mcp":
-        # Ensure Accept header is present (required by MCP Streamable HTTP spec)
+        # Accept ヘッダーを強制付与（MCP Streamable HTTP 仕様で必須）
         headers = list(scope.get("headers", []))
         if b"accept" not in [k.lower() for k, v in headers]:
             headers.append((b"accept", b"application/json, text/event-stream"))
@@ -94,7 +94,7 @@ async def app(scope, receive, send):
         await session_manager.handle_request(scope, receive, send)
         return
 
-    # OAuth discovery endpoints (return empty 200 to skip auth flow)
+    # OAuth ディスカバリエンドポイント（認証不要として空の200を返す）
     if path in (
         "/.well-known/oauth-protected-resource",
         "/.well-known/oauth-protected-resource/mcp",
@@ -103,7 +103,7 @@ async def app(scope, receive, send):
         await send_json(send, 200, {})
         return
 
-    # OAuth client registration (dummy response)
+    # OAuth クライアント登録（ダミーレスポンス）
     if path == "/register":
         await send_json(send, 200, {"client_id": "dummy"})
         return
