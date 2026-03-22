@@ -78,14 +78,18 @@ your-project/
   Dockerfile
 ```
 
-### Dockerfile
+#### Dockerfile
+
+変更が必要な箇所にコメントを記載しています：
 
 ```dockerfile
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# stdio MCP サーバーをクローン
+# ↓【変更】stdio MCP サーバーのリポジトリURLを指定
+# src/ 以下にサーバーコードがある場合は /tmp/mcp/src/. のまま
+# src/ がなくルート直下にある場合は /tmp/mcp/. に変更
 RUN apt-get update && apt-get install -y --no-install-recommends git && \
     git clone --depth=1 https://github.com/your-org/your-mcp-server.git /tmp/mcp && \
     cp -r /tmp/mcp/src/. ./stdio/ && \
@@ -95,20 +99,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends git && \
 COPY requirements.txt server.py ./
 RUN pip install --no-cache-dir -r requirements.txt
 
+# ↓【変更】stdio サーバーの起動コマンド（server.py 以外の場合）
 ENV STDIO_CMD="python server.py"
+# ↓【変更不要】クローン先を変えた場合のみ修正
 ENV STDIO_CWD="/app/stdio"
 
 EXPOSE 8080
 CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8080"]
 ```
 
-### requirements.txt（まとめた例）
+#### requirements.txt
+
+ブリッジ必須の3行 + stdio サーバーの依存パッケージを追記します：
 
 ```
+# ブリッジ必須（変更不要）
 mcp
 uvicorn
 starlette
-# stdio サーバーの依存パッケージを以下に追加
+# ↓【変更】stdio サーバーの requirements.txt の内容をここに追加
 shapely
 pyproj
 requests
